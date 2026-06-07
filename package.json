@@ -1,0 +1,20 @@
+{
+  "name": "wasm4-tetris",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An original WASM-4 falling-block puzzle PWA.",
+  "license": "MIT",
+  "author": "VdustR (ViPro)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vdustr/wasm4-tetris.git"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "serve": "node scripts/serve-dist.mjs"
+  },
+  "devDependencies": {
+    "wasm4": "^2.7.1"
+  }
+}

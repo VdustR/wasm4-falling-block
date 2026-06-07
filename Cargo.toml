@@ -1,0 +1,18 @@
+[package]
+name = "stackline"
+version = "0.1.0"
+edition = "2021"
+authors = ["VdustR (ViPro)"]
+license = "MIT"
+description = "An original WASM-4 falling-block puzzle game inspired by handheld classics."
+repository = "https://github.com/vdustr/wasm4-tetris"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = "z"
+lto = true
+panic = "abort"

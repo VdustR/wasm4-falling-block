@@ -1,0 +1,19 @@
+{
+  "name": "Stackline",
+  "short_name": "Stackline",
+  "description": "An original WASM-4 falling-block puzzle PWA.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "oklch(0.090 0.000 0)",
+  "theme_color": "oklch(0.430 0.090 110)",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

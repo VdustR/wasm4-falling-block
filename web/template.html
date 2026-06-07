@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+  {{#html.metadata}}
+  <meta name="{{name}}" content="{{content}}">
+  {{/html.metadata}}
+  {{#html.description}}
+  <meta name="description" content="{{html.description}}">
+  {{/html.description}}
+  {{#html.iconUrl}}
+  <link rel="shortcut icon" href="{{html.iconUrl}}">
+  {{/html.iconUrl}}
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="oklch(0.430 0.090 110)">
+  {{#html.diskPrefix}}
+  <script id="wasm4-disk-prefix" type="text/plain">{{{html.diskPrefix}}}</script>
+  {{/html.diskPrefix}}
+  <title>{{html.title}}</title>
+  <style>{{{html.wasm4Css}}}</style>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: oklch(0.090 0.000 0);
+      --surface: oklch(0.165 0.030 110);
+      --panel: oklch(0.230 0.050 110);
+      --ink: oklch(0.935 0.012 110);
+      --muted: oklch(0.735 0.035 110);
+      --primary: oklch(0.430 0.090 110);
+      --screen: oklch(0.810 0.130 135);
+      --accent: oklch(0.620 0.170 32);
+      --danger: oklch(0.560 0.180 28);
+      --focus: oklch(0.780 0.160 135);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: 100%;
+      height: 100svh;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: clamp(10px, 3vw, 24px);
+    }
+
+    body[data-update-visible="true"] .app-shell {
+      padding-bottom: calc(clamp(10px, 3vw, 24px) + 82px);
+    }
+
+    .stage {
+      width: min(100%, 920px);
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(188px, 320px) minmax(268px, 1fr);
+      gap: clamp(14px, 2.5vw, 22px);
+      align-items: stretch;
+    }
+
+    .home-panel,
+    .game-panel {
+      min-width: 0;
+      background: var(--surface);
+      border-radius: 12px;
+    }
+
+    .home-panel {
+      padding: clamp(14px, 2.2vw, 22px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 2vw, 18px);
+      justify-content: space-between;
+    }
+
+    .title-block {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 2rem;
+      line-height: 1;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .summary {
+      margin: 0;
+      color: var(--muted);
+      max-width: 34ch;
+      line-height: 1.42;
+      text-wrap: pretty;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .primary-button,
+    .quiet-button {
+      min-height: 42px;
+      border-radius: 8px;
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    .primary-button {
+      border: 0;
+      background: var(--accent);
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .quiet-button {
+      border: 1px solid var(--panel);
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .primary-button:focus-visible,
+    .quiet-button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .notes {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .notes code {
+      color: var(--screen);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 0.9em;
+    }
+
+    .game-panel {
+      min-height: min(520px, calc(100svh - 48px));
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--panel);
+    }
+
+    .viewport-frame {
+      width: min(100%, 500px, calc(100svh - 80px));
+      min-width: 0;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg);
+      contain: paint;
+    }
+
+    wasm4-app {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .site-footer {
+      width: min(100%, 920px);
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .site-footer a {
+      color: var(--screen);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .update-prompt {
+      position: fixed;
+      inset: auto 16px 16px auto;
+      width: min(340px, calc(100vw - 32px));
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      display: none;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 30;
+    }
+
+    .update-prompt[data-visible="true"] {
+      display: flex;
+    }
+
+    .update-prompt p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .update-prompt .primary-button {
+      min-width: 126px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 510px) {
+      .app-shell {
+        align-items: start;
+        padding: 10px;
+        gap: 10px;
+      }
+
+      body[data-update-visible="true"] .app-shell {
+        padding-bottom: 92px;
+      }
+
+      .stage {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .home-panel {
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .title-block {
+        gap: 8px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .notes {
+        gap: 6px;
+        font-size: 0.78rem;
+      }
+
+      .game-panel {
+        min-height: auto;
+        padding: 10px;
+      }
+
+      .viewport-frame {
+        width: min(100%, 58svh, 430px);
+      }
+
+      .site-footer {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script id="wasm4-cart-json" type="application/json">{{{html.wasmCartJson}}}</script>
+  <script>{{{html.wasm4js}}}</script>
+
+  <main class="app-shell">
+    <div class="stage">
+      <section class="home-panel" aria-labelledby="gameTitle">
+        <div class="title-block">
+          <div class="status-row">
+            <span>WASM-4 cartridge</span>
+            <span>Offline ready</span>
+          </div>
+          <h1 id="gameTitle">Stackline</h1>
+          <p class="summary">Original falling-block puzzle with a deliberate title screen, responsive controls, and handmade chiptune audio.</p>
+        </div>
+
+        <div class="actions">
+          <button class="primary-button" type="button" id="startGame">Start game</button>
+          <button class="quiet-button" type="button" id="focusGame">Focus controls</button>
+        </div>
+
+        <div class="notes">
+          <span><code>X</code> rotates or starts. <code>Z</code> rotates counterclockwise. Arrow keys move and soft drop.</span>
+        </div>
+      </section>
+
+      <section class="game-panel" aria-label="Stackline game viewport">
+        <div class="viewport-frame" id="gameFrame">
+          <wasm4-app></wasm4-app>
+        </div>
+      </section>
+    </div>
+
+    <footer class="site-footer">
+      <span>MIT License, 2026 VdustR (ViPro)</span>
+      <a href="https://github.com/vdustr/wasm4-tetris" rel="noreferrer">GitHub</a>
+    </footer>
+  </main>
+
+  <aside class="update-prompt" id="updatePrompt" role="status" aria-live="polite">
+    <p>A new offline build is ready.</p>
+    <button class="primary-button" type="button" id="reloadUpdate">Reload game</button>
+  </aside>
+
+  <script>
+    const gameFrame = document.getElementById("gameFrame");
+    const updatePrompt = document.getElementById("updatePrompt");
+    const reloadUpdate = document.getElementById("reloadUpdate");
+    let waitingWorker = null;
+
+    function pressKey(code) {
+      window.dispatchEvent(new KeyboardEvent("keydown", { code, bubbles: true }));
+      window.setTimeout(() => {
+        window.dispatchEvent(new KeyboardEvent("keyup", { code, bubbles: true }));
+      }, 80);
+    }
+
+    function focusGame() {
+      gameFrame.scrollIntoView({ block: "center", inline: "center" });
+    }
+
+    document.getElementById("startGame").addEventListener("click", () => {
+      focusGame();
+      pressKey("KeyX");
+    });
+    document.getElementById("focusGame").addEventListener("click", focusGame);
+
+    function showUpdate(worker) {
+      waitingWorker = worker;
+      document.body.dataset.updateVisible = "true";
+      updatePrompt.dataset.visible = "true";
+    }
+
+    reloadUpdate.addEventListener("click", () => {
+      waitingWorker?.postMessage({ type: "SKIP_WAITING" });
+    });
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then((registration) => {
+        if (registration.waiting) {
+          showUpdate(registration.waiting);
+        }
+
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing;
+          worker?.addEventListener("statechange", () => {
+            if (worker.state === "installed" && navigator.serviceWorker.controller) {
+              showUpdate(worker);
+            }
+          });
+        });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
+      });
+    }
+  </script>
+</body>
+</html>
