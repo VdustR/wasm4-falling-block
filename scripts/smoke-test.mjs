@@ -104,6 +104,7 @@ for (const needle of [
   "data-control-code",
   "activeControlPointers",
   "MIN_CONTROL_PRESS_MS",
+  "releaseControlPress(pointerId, existing)",
   "virtualGamepadSyncTimer",
   "maxVirtualGamepadSyncAttempts"
 ]) {

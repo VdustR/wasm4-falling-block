@@ -78,6 +78,7 @@ pub struct Game {
     left_hold_frames: u8,
     right_hold_frames: u8,
     lock_timer: u8,
+    lock_resets: u8,
     buffered_input: u8,
     input_buffer_timer: u8,
     soft_drop_sound_timer: u8,
@@ -94,6 +95,7 @@ const START_Y: i8 = 0;
 const DAS_FRAMES: u8 = 12;
 const ARR_FRAMES: u8 = 4;
 const LOCK_DELAY_FRAMES: u8 = 20;
+const LOCK_RESET_LIMIT: u8 = 15;
 const INPUT_BUFFER_FRAMES: u8 = 18;
 const SOFT_DROP_FRAMES: u32 = 2;
 const SOFT_DROP_SOUND_FRAMES: u8 = 5;
@@ -172,6 +174,7 @@ impl Game {
             left_hold_frames: 0,
             right_hold_frames: 0,
             lock_timer: 0,
+            lock_resets: 0,
             buffered_input: 0,
             input_buffer_timer: 0,
             soft_drop_sound_timer: 0,
@@ -335,7 +338,7 @@ impl Game {
 
         if input & BTN_DOWN != 0 && self.frame % SOFT_DROP_FRAMES == 0 {
             if self.try_move(0, 1) {
-                self.lock_timer = 0;
+                self.reset_lock_state_after_descent();
                 self.score = self.score.saturating_add(1);
                 self.touch_hi_score();
                 if self.soft_drop_sound_timer == 0 {
@@ -347,7 +350,7 @@ impl Game {
 
         if self.frame % self.gravity_frames() == 0 {
             if self.try_move(0, 1) {
-                self.lock_timer = 0;
+                self.reset_lock_state_after_descent();
             }
         }
 
@@ -440,6 +443,7 @@ impl Game {
             kind: self.current.kind,
             rot,
         };
+        let was_grounded = self.grounded();
         for (kick_x, kick_y) in [
             (0, 0),
             (-1, 0),
@@ -455,7 +459,7 @@ impl Game {
                 self.current = rotated;
                 self.x += kick_x;
                 self.y += kick_y;
-                self.lock_timer = 0;
+                self.reset_lock_delay_after_action(was_grounded);
                 return true;
             }
         }
@@ -463,7 +467,7 @@ impl Game {
     }
 
     fn lock_piece(&mut self) -> SoundEvent {
-        self.lock_timer = 0;
+        self.reset_lock_state_after_descent();
         let piece_id = self.take_next_piece_id();
         for (cx, cy) in Self::piece_cells(self.current) {
             let bx = self.x + cx;
@@ -504,7 +508,7 @@ impl Game {
         self.next_style = self.random_style();
         self.x = START_X;
         self.y = START_Y;
-        self.lock_timer = 0;
+        self.reset_lock_state_after_descent();
         if !self.fits(self.current, self.x, self.y) {
             self.mode = Mode::GameOver;
             self.touch_hi_score();
@@ -544,7 +548,7 @@ impl Game {
         self.next_style = self.random_style();
         self.x = START_X;
         self.y = START_Y;
-        self.lock_timer = 0;
+        self.reset_lock_state_after_descent();
         self.set_demo_target();
         if !self.fits(self.current, self.x, self.y) {
             self.reset_cpu_demo();
@@ -576,6 +580,7 @@ impl Game {
     fn update_horizontal_movement(&mut self, input: u8, pressed: u8) -> SoundEvent {
         let left = input & BTN_LEFT != 0;
         let right = input & BTN_RIGHT != 0;
+        let was_overlapping = self.last_input & BTN_LEFT != 0 && self.last_input & BTN_RIGHT != 0;
 
         if left == right {
             self.left_hold_frames = 0;
@@ -585,7 +590,7 @@ impl Game {
 
         if left {
             self.right_hold_frames = 0;
-            if pressed & BTN_LEFT != 0 {
+            if pressed & BTN_LEFT != 0 || was_overlapping {
                 self.left_hold_frames = 0;
                 return self.try_horizontal_move(-1);
             }
@@ -596,7 +601,7 @@ impl Game {
             }
         } else {
             self.left_hold_frames = 0;
-            if pressed & BTN_RIGHT != 0 {
+            if pressed & BTN_RIGHT != 0 || was_overlapping {
                 self.right_hold_frames = 0;
                 return self.try_horizontal_move(1);
             }
@@ -611,8 +616,9 @@ impl Game {
     }
 
     fn try_horizontal_move(&mut self, dx: i8) -> SoundEvent {
+        let was_grounded = self.grounded();
         if self.try_move(dx, 0) {
-            self.lock_timer = 0;
+            self.reset_lock_delay_after_action(was_grounded);
             SoundEvent::Move
         } else {
             SoundEvent::None
@@ -653,7 +659,7 @@ impl Game {
     fn buffer_input(&mut self, pressed: u8) {
         let input = pressed & BUFFERABLE_INPUT;
         if input != 0 {
-            self.buffered_input = input;
+            self.buffered_input |= input;
             self.input_buffer_timer = INPUT_BUFFER_FRAMES;
         }
     }
@@ -701,9 +707,27 @@ impl Game {
         self.left_hold_frames = 0;
         self.right_hold_frames = 0;
         self.lock_timer = 0;
+        self.lock_resets = 0;
         self.buffered_input = 0;
         self.input_buffer_timer = 0;
         self.soft_drop_sound_timer = 0;
+    }
+
+    fn reset_lock_state_after_descent(&mut self) {
+        self.lock_timer = 0;
+        self.lock_resets = 0;
+    }
+
+    fn reset_lock_delay_after_action(&mut self, was_grounded: bool) {
+        if !was_grounded {
+            self.lock_timer = 0;
+            return;
+        }
+
+        if self.lock_resets < LOCK_RESET_LIMIT {
+            self.lock_timer = 0;
+            self.lock_resets += 1;
+        }
     }
 
     #[cfg(test)]
@@ -1049,6 +1073,23 @@ mod tests {
     }
 
     #[test]
+    fn releasing_one_of_two_horizontal_inputs_moves_remaining_direction() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 1, rot: 0 };
+        game.x = 4;
+        game.y = 0;
+
+        game.tick(BTN_LEFT);
+        assert_eq!(game.position().0, 3);
+
+        game.tick(BTN_LEFT | BTN_RIGHT);
+        assert_eq!(game.position().0, 3);
+
+        game.tick(BTN_RIGHT);
+        assert_eq!(game.position().0, 4);
+    }
+
+    #[test]
     fn buffered_rotation_applies_after_line_clear_animation() {
         let mut game = playing_game();
         game.current = Piece { kind: 0, rot: 0 };
@@ -1065,12 +1106,15 @@ mod tests {
         assert_eq!(game.lock_piece(), SoundEvent::Line(1));
         game.tick(BTN_1);
         game.tick(0);
+        game.tick(BTN_LEFT);
+        game.tick(0);
         while game.is_clearing() {
             game.tick(0);
         }
 
         assert_eq!(game.current.kind, 2);
         assert_eq!(game.current.rot, 1);
+        assert_eq!(game.position().0, START_X - 1);
     }
 
     #[test]
@@ -1089,6 +1133,28 @@ mod tests {
 
         for _ in 0..20 {
             game.tick(0);
+        }
+
+        assert!(game.board.iter().any(|cell| *cell != 0));
+    }
+
+    #[test]
+    fn grounded_lock_delay_resets_are_limited() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 1, rot: 0 };
+        game.x = 4;
+        game.y = 18;
+        game.frame = game.gravity_frames() - 1;
+
+        game.tick(0);
+
+        for turn in 0..usize::from(LOCK_RESET_LIMIT) + usize::from(LOCK_DELAY_FRAMES) + 8 {
+            let input = if turn % 2 == 0 { BTN_LEFT } else { BTN_RIGHT };
+            game.tick(input);
+            game.tick(0);
+            if game.board.iter().any(|cell| *cell != 0) {
+                break;
+            }
         }
 
         assert!(game.board.iter().any(|cell| *cell != 0));

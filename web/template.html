@@ -619,8 +619,19 @@
 
     function beginControlPress(button, pointerId) {
       const code = button.dataset.controlCode;
-      if (!code || activeControlPointers.has(pointerId)) {
+      if (!code) {
         return;
+      }
+
+      const existing = activeControlPointers.get(pointerId);
+      if (existing) {
+        if (existing.releaseTimer === 0) {
+          return;
+        }
+
+        window.clearTimeout(existing.releaseTimer);
+        existing.releaseTimer = 0;
+        releaseControlPress(pointerId, existing);
       }
 
       activeControlPointers.set(pointerId, {
