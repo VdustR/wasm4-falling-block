@@ -295,7 +295,7 @@ fn draw_styled_cell(x: i32, y: i32, size: i32, style: BlockStyle) {
 
 fn draw_cell_fill(x: i32, y: i32, size: i32, color: u8) {
     unsafe {
-        *DRAW_COLORS = color as u16;
+        *DRAW_COLORS = solid_draw_color(color);
     }
     rect(x, y, size as u32, size as u32);
 }
@@ -310,7 +310,7 @@ fn draw_inner_frame_cut(x: i32, y: i32, size: i32) {
 
 fn draw_dither_cell(x: i32, y: i32, size: i32, color: u8) {
     unsafe {
-        *DRAW_COLORS = color as u16;
+        *DRAW_COLORS = solid_draw_color(color);
     }
     for yy in 0..size {
         for xx in 0..size {
@@ -319,6 +319,11 @@ fn draw_dither_cell(x: i32, y: i32, size: i32, color: u8) {
             }
         }
     }
+}
+
+fn solid_draw_color(color: u8) -> u16 {
+    let color = color as u16;
+    color | (color << 4)
 }
 
 fn draw_cell_outline(x: i32, y: i32, size: i32, top: bool, right: bool, bottom: bool, left: bool) {
