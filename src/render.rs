@@ -7,6 +7,7 @@ const CELL: i32 = 6;
 const BOARD_X: i32 = 18;
 const BOARD_Y: i32 = 20;
 const PANEL_X: i32 = 88;
+const BLOCK_OUTLINE_COLOR: u8 = 1;
 
 pub fn draw(game: &Game) {
     clear();
@@ -87,12 +88,10 @@ fn draw_locked_blocks(game: &Game) {
         for x in 0..BOARD_WIDTH {
             if locked_cell_visible(game, x, y) {
                 let id = game.cell_id(x, y);
-                let style = game.cell_style(x, y);
                 draw_cell_outline(
                     BOARD_X + x as i32 * CELL,
                     BOARD_Y + y as i32 * CELL,
                     CELL,
-                    style.color,
                     !same_locked_piece_visible(game, x as i32, y as i32 - 1, id),
                     !same_locked_piece_visible(game, x as i32 + 1, y as i32, id),
                     !same_locked_piece_visible(game, x as i32, y as i32 + 1, id),
@@ -130,7 +129,6 @@ fn draw_current_piece(game: &Game) {
                 BOARD_X + x as i32 * CELL,
                 BOARD_Y + y as i32 * CELL,
                 CELL,
-                style.color,
                 !piece_has_board_cell(cells, px, py, x, y - 1),
                 !piece_has_board_cell(cells, px, py, x + 1, y),
                 !piece_has_board_cell(cells, px, py, x, y + 1),
@@ -242,7 +240,6 @@ fn draw_piece_preview(piece: Piece, style: BlockStyle, x: i32, y: i32, size: i32
             x + cx as i32 * size,
             y + cy as i32 * size,
             size,
-            style.color,
             !piece_has_local_cell(cells, cx, cy - 1),
             !piece_has_local_cell(cells, cx + 1, cy),
             !piece_has_local_cell(cells, cx, cy + 1),
@@ -286,12 +283,6 @@ fn draw_styled_cell(x: i32, y: i32, size: i32, style: BlockStyle) {
 
     match style.pattern {
         BlockPattern::Solid => draw_cell_fill(x, y, size, style.color),
-        BlockPattern::Cutout => {
-            draw_cell_fill(x, y, size, style.color);
-            if size > 4 {
-                draw_cell_cutout(x, y, size, 2);
-            }
-        }
         BlockPattern::InnerFrame => {
             draw_cell_fill(x, y, size, style.color);
             if size > 4 {
@@ -304,25 +295,13 @@ fn draw_styled_cell(x: i32, y: i32, size: i32, style: BlockStyle) {
 
 fn draw_cell_fill(x: i32, y: i32, size: i32, color: u8) {
     unsafe {
-        *DRAW_COLORS = color as u16 | 0x0010;
+        *DRAW_COLORS = solid_draw_color(color);
     }
     rect(x, y, size as u32, size as u32);
 }
 
-fn draw_cell_cutout(x: i32, y: i32, size: i32, inset: i32) {
-    unsafe {
-        *DRAW_COLORS = 0x0001;
-    }
-    rect(
-        x + inset,
-        y + inset,
-        (size - inset * 2) as u32,
-        (size - inset * 2) as u32,
-    );
-}
-
 fn draw_inner_frame_cut(x: i32, y: i32, size: i32) {
-    set_line_color(1);
+    set_line_color(BLOCK_OUTLINE_COLOR);
     hline(x + 2, y + 2, (size - 4) as u32);
     hline(x + 2, y + size - 3, (size - 4) as u32);
     vline(x + 2, y + 2, (size - 4) as u32);
@@ -331,7 +310,7 @@ fn draw_inner_frame_cut(x: i32, y: i32, size: i32) {
 
 fn draw_dither_cell(x: i32, y: i32, size: i32, color: u8) {
     unsafe {
-        *DRAW_COLORS = color as u16 | 0x0010;
+        *DRAW_COLORS = solid_draw_color(color);
     }
     for yy in 0..size {
         for xx in 0..size {
@@ -342,17 +321,13 @@ fn draw_dither_cell(x: i32, y: i32, size: i32, color: u8) {
     }
 }
 
-fn draw_cell_outline(
-    x: i32,
-    y: i32,
-    size: i32,
-    color: u8,
-    top: bool,
-    right: bool,
-    bottom: bool,
-    left: bool,
-) {
-    set_line_color(color);
+fn solid_draw_color(color: u8) -> u16 {
+    let color = color as u16;
+    color | (color << 4)
+}
+
+fn draw_cell_outline(x: i32, y: i32, size: i32, top: bool, right: bool, bottom: bool, left: bool) {
+    set_line_color(BLOCK_OUTLINE_COLOR);
     if top {
         hline(x, y, size as u32);
     }

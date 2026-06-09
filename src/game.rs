@@ -45,7 +45,6 @@ pub struct Piece {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BlockPattern {
     Solid,
-    Cutout,
     InnerFrame,
     Dither,
 }
@@ -834,10 +833,9 @@ impl Game {
 
     fn random_style(&mut self) -> BlockStyle {
         let color = 2 + ((self.next_random() >> 16) % 3) as u8;
-        let pattern = match (self.next_random() >> 16) % 4 {
+        let pattern = match (self.next_random() >> 16) % 3 {
             0 => BlockPattern::Solid,
-            1 => BlockPattern::Cutout,
-            2 => BlockPattern::InnerFrame,
+            1 => BlockPattern::InnerFrame,
             _ => BlockPattern::Dither,
         };
         BlockStyle { color, pattern }
@@ -1256,7 +1254,7 @@ mod tests {
         let mut game = playing_game();
         let survivor_style = BlockStyle {
             color: 3,
-            pattern: BlockPattern::Cutout,
+            pattern: BlockPattern::Dither,
         };
         game.board[18 * BOARD_WIDTH + 2] = 1;
         game.board_ids[18 * BOARD_WIDTH + 2] = 12;
@@ -1266,7 +1264,7 @@ mod tests {
             game.board_ids[19 * BOARD_WIDTH + x] = 8;
             game.board_styles[19 * BOARD_WIDTH + x] = BlockStyle {
                 color: 4,
-                pattern: BlockPattern::Dither,
+                pattern: BlockPattern::InnerFrame,
             };
         }
 
@@ -1277,6 +1275,26 @@ mod tests {
         assert_eq!(game.cell_id(2, 19), 12);
         assert_eq!(game.cell_style(2, 19), survivor_style);
         assert_eq!(game.cell_style(2, 18).color, 0);
+    }
+
+    #[test]
+    fn random_styles_keep_only_readable_pattern_variants() {
+        let mut game = playing_game();
+        let mut seen_solid = false;
+        let mut seen_inner_frame = false;
+        let mut seen_dither = false;
+
+        for _ in 0..64 {
+            match game.random_style().pattern {
+                BlockPattern::Solid => seen_solid = true,
+                BlockPattern::InnerFrame => seen_inner_frame = true,
+                BlockPattern::Dither => seen_dither = true,
+            }
+        }
+
+        assert!(seen_solid);
+        assert!(seen_inner_frame);
+        assert!(seen_dither);
     }
 
     #[test]
