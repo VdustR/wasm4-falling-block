@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, copyFileSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -37,6 +37,7 @@ function resolveW4() {
 }
 
 mkdirSync(dist, { recursive: true });
+rmSync(join(dist, "og-candidates"), { recursive: true, force: true });
 
 run("cargo", ["build", "--release"]);
 
@@ -85,12 +86,6 @@ copyFileSync(join(root, "public/icon-512.png"), join(dist, "icon-512.png"));
 copyFileSync(join(root, "public/main-visual.svg"), join(dist, "main-visual.svg"));
 copyFileSync(join(root, "public/main-visual.png"), join(dist, "main-visual.png"));
 copyFileSync(join(root, "public/og-image.png"), join(dist, "og-image.png"));
-mkdirSync(join(dist, "og-candidates"), { recursive: true });
-for (const asset of readdirSync(join(root, "public/og-candidates"))) {
-  if (asset.endsWith(".png")) {
-    copyFileSync(join(root, "public/og-candidates", asset), join(dist, "og-candidates", asset));
-  }
-}
 copyFileSync(join(root, "docs/prototype.png"), join(dist, "prototype.png"));
 
 console.log("Built dist/index.html");

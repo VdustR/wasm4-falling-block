@@ -14,10 +14,6 @@ const required = [
   "dist/main-visual.svg",
   "dist/main-visual.png",
   "dist/og-image.png",
-  "dist/og-candidates/falling-block-og-a.png",
-  "dist/og-candidates/falling-block-og-b.png",
-  "dist/og-candidates/falling-block-og-c.png",
-  "dist/og-candidates/falling-block-og-d.png",
   "target/wasm32-unknown-unknown/release/falling_block.wasm"
 ];
 
