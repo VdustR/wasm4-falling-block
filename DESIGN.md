@@ -18,16 +18,19 @@ Use `system-ui` for the PWA shell and the WASM-4 built-in 8px bitmap font inside
 
 ## Layout
 
-The page is a full-height app shell. A compact command/score rail sits beside or above the 160x160 WASM-4 viewport depending on available width. No landing-page hero or nested cards.
+The page is a full-height app shell. A compact command panel sits beside or above the 160x160 WASM-4 viewport depending on available width. No landing-page hero or nested cards. On small screens, Start and Focus enter a play view that hides the web shell chrome and gives the square game viewport the largest safe-area-aware fullscreen footprint available.
 
 ## Components
 
+- Brand system: the primary mark is the selected `Slanted Drop Cart` direction from `docs/logo-showcase.html`: a pure tilted retro cartridge icon with a lime body, black play window, and orange active block. It intentionally has no outer tile background, while reusing the Falling Block palette so the app icon, main visual, and cartridge feel like one system.
 - Game viewport: square, pixel-rendered, framed by restrained product chrome.
 - Blocks: each tetromino receives a random single-color visual style independent of piece kind and gameplay state. The four style variants are solid, cutout, inner-frame, and dither. Locked pieces render as connected shapes with outer contours, not isolated cells. Cleared rows recalculate contours as cells disappear.
 - Hi score: prominent numeric readout on the cartridge title screen. The web shell avoids duplicate score or mode cards.
 - Title demo: before player start, the cartridge runs low-key CPU demo play in the viewport while keeping the real game unstarted. The title overlay stays on the board, showing hi score and an always-visible blinking `PRESS X/Z START` prompt.
 - Game-over overlay: restart instructions must stay inside a black panel so they never overlap unreadably with the board behind them.
 - Start button: filled accent action, keyboard and pointer accessible.
+- Mobile fullscreen: installed PWA launch requests fullscreen display mode. Browser play view uses the Fullscreen API when available and still works as a chrome-free mobile layout when the API is unavailable.
+- Visual pad: mobile play view uses the WASM-4 runtime's built-in virtual gamepad. The cartridge must not set `SYSTEM_HIDE_GAMEPAD_OVERLAY`; the shell only forces the built-in gamepad visible on narrow viewports when desktop test browsers do not report coarse pointer media.
 - Update prompt: small fixed toast with a direct reload action.
 - Footer: compact MIT License, 2026 VdustR (ViPro), and GitHub link.
 - Rights note: short, explicit, and linked to `docs/music-rights.md` in the repository.
@@ -38,4 +41,4 @@ Only small state transitions are used in the web shell. The game animation is re
 
 ## Audio
 
-Music sits below the sound effects in the mix. Move, rotate, lock, line-clear, and game-over cues should remain easier to hear than the background loop.
+Music sits below the sound effects in the mix, but both should be audible on phone speakers. Move, rotate, lock, line-clear, and game-over cues should remain easier to hear than the background loop.

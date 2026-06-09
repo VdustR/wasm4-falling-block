@@ -1,11 +1,11 @@
 [package]
-name = "stackline"
+name = "falling-block"
 version = "0.1.0"
 edition = "2021"
 authors = ["VdustR (ViPro)"]
 license = "MIT"
-description = "An original WASM-4 falling-block puzzle game inspired by handheld classics."
-repository = "https://github.com/vdustr/wasm4-tetris"
+description = "A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio."
+repository = "https://github.com/vdustr/wasm4-falling-block"
 
 [lib]
 crate-type = ["cdylib"]

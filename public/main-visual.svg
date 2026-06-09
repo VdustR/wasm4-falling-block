@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Falling Block main visual">
+  <rect width="1200" height="630" fill="#080b07"/>
+  <g opacity="0.14" stroke="#bbe06b" stroke-width="1">
+    <path d="M72 82H540"/>
+    <path d="M72 160H462"/>
+    <path d="M72 238H510"/>
+    <path d="M72 316H434"/>
+    <path d="M72 394H486"/>
+    <path d="M72 472H420"/>
+  </g>
+  <g opacity="0.18" fill="#bbe06b">
+    <rect x="76" y="516" width="12" height="12" rx="3"/>
+    <rect x="104" y="516" width="12" height="12" rx="3"/>
+    <rect x="132" y="516" width="12" height="12" rx="3"/>
+    <rect x="160" y="516" width="12" height="12" rx="3"/>
+    <rect x="188" y="516" width="12" height="12" rx="3"/>
+  </g>
+  <text x="72" y="220" fill="#f1f5db" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="72" font-weight="800" letter-spacing="0">Falling Block</text>
+  <text x="78" y="276" fill="#bbe06b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" letter-spacing="5">WASM-4 FALLING BLOCK PWA</text>
+  <text x="78" y="342" fill="#9fb183" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="500">Original chiptune puzzle with offline play.</text>
+  <text x="78" y="378" fill="#9fb183" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="500">Fullscreen mobile PWA. Built-in virtual gamepad.</text>
+  <circle cx="923" cy="315" r="244" fill="#bbe06b" opacity="0.08"/>
+  <circle cx="923" cy="315" r="206" fill="none" stroke="#bbe06b" stroke-width="2" opacity="0.16"/>
+  <image href="icon-512.png" x="667" y="59" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Falling Block logo candidate A, Monogram S" color="#bbe06b">
+  <path d="M72 24H39C30 24 23 31 23 40s7 16 16 16h23c9 0 16 7 16 16s-7 16-16 16H27" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="currentColor">
+    <rect x="25" y="18" width="12" height="12" rx="3"/>
+    <rect x="63" y="70" width="12" height="12" rx="3"/>
+  </g>
+</svg>

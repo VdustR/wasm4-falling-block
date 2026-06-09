@@ -41,7 +41,6 @@ fn start() {
         (*wasm4::PALETTE)[1] = 0xbbe06b;
         (*wasm4::PALETTE)[2] = 0x6fa84f;
         (*wasm4::PALETTE)[3] = 0xe05d2e;
-        *wasm4::SYSTEM_FLAGS = wasm4::SYSTEM_HIDE_GAMEPAD_OVERLAY;
         addr_of_mut!(GAME).write(MaybeUninit::new(Game::new(load_hi_score())));
         GAME_READY = true;
     }

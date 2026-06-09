@@ -12,6 +12,7 @@ const types = new Map([
   [".js", "text/javascript; charset=utf-8"],
   [".json", "application/json; charset=utf-8"],
   [".webmanifest", "application/manifest+json; charset=utf-8"],
+  [".ico", "image/x-icon"],
   [".svg", "image/svg+xml; charset=utf-8"],
   [".png", "image/png"],
   [".wasm", "application/wasm"]
@@ -29,5 +30,5 @@ createServer((request, response) => {
   response.setHeader("Cache-Control", "no-cache");
   createReadStream(file).pipe(response);
 }).listen(port, "127.0.0.1", () => {
-  console.log(`Serving Stackline at http://127.0.0.1:${port}`);
+  console.log(`Serving Falling Block at http://127.0.0.1:${port}`);
 });

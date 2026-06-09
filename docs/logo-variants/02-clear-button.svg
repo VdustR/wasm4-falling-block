@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Falling Block logo candidate B, Clear Button" color="#bbe06b">
+  <defs>
+    <mask id="clear-button-cut">
+      <rect width="100" height="100" fill="white"/>
+      <rect x="20" y="46" width="60" height="9" rx="4.5" fill="black"/>
+      <rect x="56" y="24" width="13" height="13" rx="3" fill="black"/>
+      <rect x="69" y="37" width="13" height="13" rx="3" fill="black"/>
+    </mask>
+  </defs>
+  <circle cx="50" cy="50" r="36" fill="currentColor" mask="url(#clear-button-cut)"/>
+  <circle cx="50" cy="50" r="36" fill="none" stroke="currentColor" stroke-width="4"/>
+</svg>

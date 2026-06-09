@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Falling Block Selected Logo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b07;
+      --surface: #11170e;
+      --preview: #f1f5db;
+      --line: rgb(187 224 107 / 0.22);
+      --ink: #f1f5db;
+      --muted: #a9b98f;
+      --screen: #bbe06b;
+      --accent: #e05d2e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      padding: 42px 20px 72px;
+      display: grid;
+      gap: 24px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 7vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .kicker,
+    .label {
+      color: var(--screen);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .summary {
+      max-width: 72ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 380px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .icon-panel {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: var(--preview);
+    }
+
+    .icon-panel img {
+      width: min(100%, 320px);
+      aspect-ratio: 1;
+      object-fit: contain;
+    }
+
+    .hero-panel img {
+      width: 100%;
+      display: block;
+    }
+
+    .body {
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+    }
+
+    .body p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">Selected direction</p>
+      <h1>Slanted Drop Cart</h1>
+      <p class="summary">Falling Block now uses the selected C-extension B mark as a pure icon: a tilted retro cartridge with a lime body, black play window, and orange active block. The mark no longer includes an app-tile background, so it can sit directly on the PWA shell, install surfaces, and social preview artwork.</p>
+    </header>
+    <section class="grid" aria-label="Selected logo assets">
+      <article class="panel">
+        <div class="icon-panel">
+          <img src="../public/icon-512.png" alt="Selected Falling Block app icon">
+        </div>
+        <div class="body">
+          <p class="label">App icon</p>
+          <h2>512px transparent PNG</h2>
+          <p>Pure cartridge icon with the outer tile removed; used for the PWA icon set and wrapped into the SVG favicon source.</p>
+        </div>
+      </article>
+      <article class="panel hero-panel">
+        <img src="../public/main-visual.png" alt="Falling Block main visual">
+        <div class="body">
+          <p class="label">Main visual</p>
+          <h2>Open Graph preview</h2>
+          <p>Uses the same selected icon so social previews, install prompts, and the app shell share one visual system.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
