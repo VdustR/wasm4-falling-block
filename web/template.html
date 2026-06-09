@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   {{#html.metadata}}
   <meta name="{{name}}" content="{{content}}">
   {{/html.metadata}}
@@ -12,8 +12,24 @@
   {{#html.iconUrl}}
   <link rel="shortcut icon" href="{{html.iconUrl}}">
   {{/html.iconUrl}}
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="oklch(0.430 0.090 110)">
+  <meta name="theme-color" content="#0b0f09">
+  <meta property="og:title" content="{{html.title}}">
+  <meta property="og:description" content="{{html.description}}">
+  <meta property="og:url" content="https://vdustr.dev/wasm4-falling-block/">
+  <meta property="og:image" content="https://vdustr.dev/wasm4-falling-block/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://vdustr.dev/wasm4-falling-block/og-image.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="{{html.title}}">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
   {{#html.diskPrefix}}
   <script id="wasm4-disk-prefix" type="text/plain">{{{html.diskPrefix}}}</script>
   {{/html.diskPrefix}}
@@ -104,6 +120,22 @@
       gap: 10px;
     }
 
+    .brand-lockup {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: clamp(68px, 8vw, 92px);
+      height: auto;
+      flex: 0 0 auto;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 14px oklch(0 0 0 / 0.32));
+    }
+
     .status-row {
       display: flex;
       align-items: center;
@@ -114,6 +146,7 @@
     }
 
     h1 {
+      min-width: 0;
       margin: 0;
       color: var(--ink);
       font-size: 2rem;
@@ -142,6 +175,7 @@
       border-radius: 8px;
       padding: 0 14px;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .primary-button {
@@ -254,10 +288,11 @@
       white-space: nowrap;
     }
 
-    @media (max-width: 510px) {
+    @media (max-width: 720px) {
       .app-shell {
-        align-items: start;
-        padding: 10px;
+        align-items: stretch;
+        justify-content: start;
+        padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
         gap: 10px;
       }
 
@@ -277,6 +312,14 @@
 
       .title-block {
         gap: 8px;
+      }
+
+      .brand-lockup {
+        gap: 10px;
+      }
+
+      .brand-icon {
+        width: 62px;
       }
 
       h1 {
@@ -300,6 +343,57 @@
       .site-footer {
         justify-content: center;
         text-align: center;
+      }
+
+      body[data-play-view="true"] {
+        overscroll-behavior: none;
+      }
+
+      body[data-play-view="true"] .app-shell {
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        overflow: hidden;
+        padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+      }
+
+      body[data-play-view="true"][data-update-visible="true"] .app-shell {
+        padding-bottom: max(6px, env(safe-area-inset-bottom));
+      }
+
+      body[data-play-view="true"] .stage {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body[data-play-view="true"] .home-panel,
+      body[data-play-view="true"] .site-footer {
+        display: none;
+      }
+
+      body[data-play-view="true"] .game-panel {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 0;
+        border-radius: 0;
+        background: var(--bg);
+      }
+
+      body[data-play-view="true"] .viewport-frame {
+        width: min(100%, 100dvh, 460px);
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+      }
+
+      body[data-play-view="true"] .update-prompt {
+        inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+        width: auto;
       }
     }
 
@@ -326,8 +420,11 @@
             <span>WASM-4 cartridge</span>
             <span>Offline ready</span>
           </div>
-          <h1 id="gameTitle">Stackline</h1>
-          <p class="summary">Original falling-block puzzle with a deliberate title screen, responsive controls, and handmade chiptune audio.</p>
+          <div class="brand-lockup">
+            <img class="brand-icon" src="icon-192.png" width="192" height="192" alt="" aria-hidden="true" decoding="async">
+            <h1 id="gameTitle">Falling Block</h1>
+          </div>
+          <p class="summary">A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio.</p>
         </div>
 
         <div class="actions">
@@ -340,7 +437,7 @@
         </div>
       </section>
 
-      <section class="game-panel" aria-label="Stackline game viewport">
+      <section class="game-panel" aria-label="Falling Block game viewport">
         <div class="viewport-frame" id="gameFrame">
           <wasm4-app></wasm4-app>
         </div>
@@ -349,7 +446,7 @@
 
     <footer class="site-footer">
       <span>MIT License, 2026 VdustR (ViPro)</span>
-      <a href="https://github.com/vdustr/wasm4-tetris" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/vdustr/wasm4-falling-block" rel="noreferrer">GitHub</a>
     </footer>
   </main>
 
@@ -362,24 +459,80 @@
     const gameFrame = document.getElementById("gameFrame");
     const updatePrompt = document.getElementById("updatePrompt");
     const reloadUpdate = document.getElementById("reloadUpdate");
+    const mobilePlayQuery = window.matchMedia("(max-width: 720px)");
     let waitingWorker = null;
 
+    function dispatchKey(code, type) {
+      window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
+    }
+
     function pressKey(code) {
-      window.dispatchEvent(new KeyboardEvent("keydown", { code, bubbles: true }));
-      window.setTimeout(() => {
-        window.dispatchEvent(new KeyboardEvent("keyup", { code, bubbles: true }));
-      }, 80);
+      dispatchKey(code, "keydown");
+      window.setTimeout(() => dispatchKey(code, "keyup"), 80);
     }
 
     function focusGame() {
       gameFrame.scrollIntoView({ block: "center", inline: "center" });
     }
 
+    function syncBuiltInVirtualGamepad() {
+      const app = document.querySelector("wasm4-app");
+      const appRoot = app?.shadowRoot;
+      if (!appRoot) {
+        window.setTimeout(syncBuiltInVirtualGamepad, 100);
+        return;
+      }
+
+      if (!appRoot.getElementById("falling-block-mobile-vpad-host")) {
+        const style = document.createElement("style");
+        style.id = "falling-block-mobile-vpad-host";
+        style.textContent = "@media (max-width: 720px) { wasm4-virtual-gamepad { display: inherit !important; } }";
+        appRoot.appendChild(style);
+      }
+
+      const virtualGamepad = appRoot.querySelector("wasm4-virtual-gamepad");
+      const virtualGamepadRoot = virtualGamepad?.shadowRoot;
+      if (virtualGamepadRoot && !virtualGamepadRoot.getElementById("falling-block-mobile-vpad")) {
+        const style = document.createElement("style");
+        style.id = "falling-block-mobile-vpad";
+        style.textContent = "@media (max-width: 720px) { :host { display: inherit !important; } }";
+        virtualGamepadRoot.appendChild(style);
+      }
+    }
+
+    function enterMobileFullscreen() {
+      if (!mobilePlayQuery.matches) {
+        return;
+      }
+
+      document.body.dataset.playView = "true";
+      syncBuiltInVirtualGamepad();
+
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+      }
+
+      if (screen.orientation?.lock) {
+        screen.orientation.lock("portrait").catch(() => {});
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      document.body.dataset.fullscreen = document.fullscreenElement ? "true" : "false";
+    });
+
+    syncBuiltInVirtualGamepad();
+    window.addEventListener("resize", syncBuiltInVirtualGamepad);
+
     document.getElementById("startGame").addEventListener("click", () => {
+      enterMobileFullscreen();
       focusGame();
       pressKey("KeyX");
     });
-    document.getElementById("focusGame").addEventListener("click", focusGame);
+    document.getElementById("focusGame").addEventListener("click", () => {
+      enterMobileFullscreen();
+      focusGame();
+    });
 
     function showUpdate(worker) {
       waitingWorker = worker;

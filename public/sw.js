@@ -1,9 +1,14 @@
-const CACHE_NAME = "stackline-__CACHE_VERSION__";
+const CACHE_NAME = "falling-block-__CACHE_VERSION__";
 const CACHE_ASSETS = [
-  "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./favicon.ico",
   "./icon.svg",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./main-visual.svg",
+  "./main-visual.png",
+  "./og-image.png",
   "./prototype.png"
 ];
 
@@ -32,6 +37,19 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
     return;
   }
 

@@ -1,14 +1,29 @@
 {
-  "name": "Stackline",
-  "short_name": "Stackline",
-  "description": "An original WASM-4 falling-block puzzle PWA.",
-  "start_url": ".",
-  "scope": ".",
-  "display": "standalone",
+  "name": "Falling Block",
+  "short_name": "Falling Block",
+  "description": "A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
   "orientation": "portrait",
-  "background_color": "oklch(0.090 0.000 0)",
-  "theme_color": "oklch(0.430 0.090 110)",
+  "background_color": "#0b0f09",
+  "theme_color": "#0b0f09",
+  "categories": ["games"],
   "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "icon.svg",
       "sizes": "any",

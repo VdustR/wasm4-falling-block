@@ -39,38 +39,38 @@ pub fn play_music(game: &Game) {
     if frame % STEP_FRAMES == 0 {
         let note = LEAD[step % LEAD.len()];
         if note != REST {
-            note_on(note, 4, 9, TONE_PULSE1 | TONE_MODE2);
+            note_on(note, 4, 13, TONE_PULSE1 | TONE_MODE2);
         }
     }
 
     if frame % (STEP_FRAMES * 2) == STEP_FRAMES {
         let note = ARP[(step / 2) % ARP.len()];
         if note != REST {
-            note_on(note, 2, 4, TONE_PULSE2 | TONE_MODE1 | TONE_PAN_RIGHT);
+            note_on(note, 2, 7, TONE_PULSE2 | TONE_MODE1 | TONE_PAN_RIGHT);
         }
     }
 
     if frame % (STEP_FRAMES * 4) == 0 {
         let note = BASS[(step / 4) % BASS.len()];
-        note_on(note, 20, 7, TONE_TRIANGLE | TONE_PAN_LEFT);
+        note_on(note, 20, 10, TONE_TRIANGLE | TONE_PAN_LEFT);
     }
 }
 
 pub fn play_sound(event: SoundEvent) {
     match event {
         SoundEvent::None => {}
-        SoundEvent::Start => note_on(62, 7, 44, TONE_PULSE1 | TONE_MODE3),
-        SoundEvent::Move => note_on(47, 2, 14, TONE_PULSE2 | TONE_MODE1 | TONE_PAN_LEFT),
-        SoundEvent::Rotate => note_on(67, 4, 26, TONE_PULSE2 | TONE_MODE2 | TONE_PAN_RIGHT),
-        SoundEvent::SoftDrop => note_on(38, 2, 12, TONE_TRIANGLE),
-        SoundEvent::Lock => noise(4, 16),
+        SoundEvent::Start => note_on(62, 7, 58, TONE_PULSE1 | TONE_MODE3),
+        SoundEvent::Move => note_on(47, 2, 24, TONE_PULSE2 | TONE_MODE1 | TONE_PAN_LEFT),
+        SoundEvent::Rotate => note_on(67, 4, 38, TONE_PULSE2 | TONE_MODE2 | TONE_PAN_RIGHT),
+        SoundEvent::SoftDrop => note_on(38, 2, 20, TONE_TRIANGLE),
+        SoundEvent::Lock => noise(4, 26),
         SoundEvent::Line(lines) => {
-            note_on(72 + lines * 2, 12, 50, TONE_PULSE1 | TONE_MODE3);
-            note_on(50 + lines, 14, 32, TONE_TRIANGLE | TONE_PAN_LEFT);
+            note_on(72 + lines * 2, 12, 68, TONE_PULSE1 | TONE_MODE3);
+            note_on(50 + lines, 14, 44, TONE_TRIANGLE | TONE_PAN_LEFT);
         }
         SoundEvent::GameOver => {
-            slide(50, 38, 26, TONE_TRIANGLE);
-            noise(16, 28);
+            slide(50, 38, 42, TONE_TRIANGLE);
+            noise(16, 46);
         }
     }
 }

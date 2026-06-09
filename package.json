@@ -1,13 +1,13 @@
 {
-  "name": "wasm4-tetris",
+  "name": "wasm4-falling-block",
   "version": "0.1.0",
   "private": true,
-  "description": "An original WASM-4 falling-block puzzle PWA.",
+  "description": "A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio.",
   "license": "MIT",
   "author": "VdustR (ViPro)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vdustr/wasm4-tetris.git"
+    "url": "https://github.com/vdustr/wasm4-falling-block.git"
   },
   "scripts": {
     "build": "node scripts/build.mjs",

@@ -10,7 +10,7 @@ This is an implementation note, not legal advice.
 
 ## Decision
 
-Stackline does not use `Korobeiniki`, the Game Boy A-Type arrangement, any Nintendo sound recording, or the registered sound-mark note sequence.
+Falling Block does not use `Korobeiniki`, the Game Boy A-Type arrangement, any Nintendo sound recording, or the registered sound-mark note sequence.
 
 The in-game loop, `Falling Olive Study`, is original. It uses an eight-bar D minor phrase with a short motive, a response, a contrasting departure, and a closing descent. The arrangement is intentionally sparse: pulse lead, quiet off-beat pulse arpeggio, and triangle bass roots. It avoids the `Korobeiniki` opening contour, the Game Boy A-Type phrase cadence, and the registered sound-mark note sequence. It is implemented directly through WASM-4 `tone()` calls in `src/audio.rs`.
 

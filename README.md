@@ -1,8 +1,8 @@
-# Stackline
+# Falling Block
 
-Stackline is an original falling-block puzzle game for the [WASM-4](https://wasm4.org) fantasy console. It is inspired by compact handheld puzzlers and uses original code, visuals, music, and sound effects.
+Falling Block is a Tetris-like falling block puzzle game for the [WASM-4](https://wasm4.org) fantasy console. It uses original code, visuals, music, and sound effects.
 
-Repository metadata targets `vdustr/wasm4-tetris`.
+Repository metadata targets `vdustr/wasm4-falling-block`.
 
 ## Features
 
@@ -10,7 +10,7 @@ Repository metadata targets `vdustr/wasm4-tetris`.
 - Title screen with persistent hi score and heuristic CPU demo play before the player starts.
 - Classic 10x20 falling-block board, next preview, score, lines, and level.
 - Original chiptune loop and sound effects using WASM-4 `tone()`.
-- PWA shell with offline caching and an update prompt.
+- Fullscreen-first mobile PWA shell with WASM-4 virtual gamepad support, offline caching, and an update prompt.
 - MIT license, copyright 2026 VdustR (ViPro).
 
 ## Controls
@@ -51,3 +51,9 @@ Use the matching host target for non-macOS systems.
 ## Music Rights
 
 The project uses an original composition named "Falling Olive Study" and original sound effects. See [docs/music-rights.md](docs/music-rights.md) for the reasoning.
+
+## Brand Assets
+
+- App icon source: [public/icon.svg](public/icon.svg)
+- Main visual source: [public/main-visual.svg](public/main-visual.svg)
+- Logo exploration: [docs/logo-showcase.html](docs/logo-showcase.html)
