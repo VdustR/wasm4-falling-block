@@ -100,6 +100,11 @@ for (const needle of [
   "requestFullscreen",
   "wasm4-virtual-gamepad",
   "falling-block-mobile-vpad",
+  "mobileControlPanel",
+  "data-control-code",
+  "activeControlPointers",
+  "MIN_CONTROL_PRESS_MS",
+  "releaseControlPress(pointerId, existing)",
   "virtualGamepadSyncTimer",
   "maxVirtualGamepadSyncAttempts"
 ]) {

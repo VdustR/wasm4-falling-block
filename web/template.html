@@ -236,6 +236,59 @@
       display: block;
     }
 
+    .mobile-controls {
+      display: none;
+    }
+
+    .control-button {
+      width: clamp(48px, 14vw, 64px);
+      min-width: 48px;
+      aspect-ratio: 1;
+      border: 1px solid oklch(0.735 0.035 110 / 0.42);
+      border-radius: 10px;
+      background: oklch(0.190 0.030 110);
+      color: var(--ink);
+      box-shadow: inset 0 -3px 0 oklch(0 0 0 / 0.28);
+      font-weight: 800;
+      line-height: 1;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .control-button[data-pressed="true"] {
+      transform: translateY(2px);
+      background: var(--accent);
+      box-shadow: inset 0 -1px 0 oklch(0 0 0 / 0.28);
+    }
+
+    .control-button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .control-icon {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-block: 8px solid transparent;
+    }
+
+    .control-icon-left {
+      border-right: 12px solid currentColor;
+    }
+
+    .control-icon-right {
+      border-left: 12px solid currentColor;
+    }
+
+    .control-icon-down {
+      border-inline: 8px solid transparent;
+      border-top: 12px solid currentColor;
+      border-bottom: 0;
+    }
+
     .site-footer {
       width: min(100%, 920px);
       min-width: 0;
@@ -366,8 +419,10 @@
         height: 100%;
         max-width: none;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: stretch;
+        gap: 10px;
       }
 
       body[data-play-view="true"] .home-panel,
@@ -377,7 +432,8 @@
 
       body[data-play-view="true"] .game-panel {
         width: 100%;
-        height: 100%;
+        flex: 1 1 auto;
+        height: auto;
         min-height: 0;
         padding: 0;
         border-radius: 0;
@@ -385,15 +441,75 @@
       }
 
       body[data-play-view="true"] .viewport-frame {
-        width: min(100%, 100dvh, 460px);
+        width: min(100%, calc(100dvh - 218px), 460px);
         max-width: 100%;
         max-height: 100%;
         border-radius: 0;
       }
 
+      body[data-play-view="true"] .mobile-controls {
+        width: min(100%, 460px);
+        flex: 0 0 auto;
+        display: grid;
+        grid-template-columns: minmax(156px, 1fr) minmax(148px, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 6px 4px max(8px, env(safe-area-inset-bottom));
+      }
+
+      .mobile-dpad {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(48px, 58px));
+        grid-template-rows: repeat(2, minmax(48px, 58px));
+        gap: 8px;
+        justify-content: start;
+      }
+
+      .mobile-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(54px, 64px));
+        grid-template-rows: repeat(2, minmax(48px, 58px));
+        gap: 10px;
+        justify-content: end;
+      }
+
+      .control-drop {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 0.68rem;
+        letter-spacing: 0;
+      }
+
+      .control-left {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .control-down {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      .control-right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      .control-z {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .control-x {
+        grid-column: 2;
+        grid-row: 1;
+        background: oklch(0.250 0.070 110);
+      }
+
       body[data-play-view="true"] .update-prompt {
-        inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+        inset: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) auto max(8px, env(safe-area-inset-left));
         width: auto;
+        opacity: 0.92;
       }
     }
 
@@ -433,7 +549,7 @@
         </div>
 
         <div class="notes">
-          <span><code>X</code> rotates or starts. <code>Z</code> rotates counterclockwise. Arrow keys move and soft drop.</span>
+          <span><code>X</code> rotates or starts. <code>Z</code> rotates counterclockwise. Arrow keys move, soft drop, and hard drop.</span>
         </div>
       </section>
 
@@ -442,6 +558,25 @@
           <wasm4-app></wasm4-app>
         </div>
       </section>
+
+      <div class="mobile-controls" id="mobileControlPanel" aria-label="Mobile game controls">
+        <div class="mobile-dpad" aria-label="Movement controls">
+          <button class="control-button control-drop" type="button" aria-label="Hard drop" data-control-code="ArrowUp">DROP</button>
+          <button class="control-button control-left" type="button" aria-label="Move left" data-control-code="ArrowLeft">
+            <span class="control-icon control-icon-left" aria-hidden="true"></span>
+          </button>
+          <button class="control-button control-down" type="button" aria-label="Soft drop" data-control-code="ArrowDown">
+            <span class="control-icon control-icon-down" aria-hidden="true"></span>
+          </button>
+          <button class="control-button control-right" type="button" aria-label="Move right" data-control-code="ArrowRight">
+            <span class="control-icon control-icon-right" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="mobile-actions" aria-label="Rotation controls">
+          <button class="control-button control-z" type="button" aria-label="Rotate counterclockwise" data-control-code="KeyZ">Z</button>
+          <button class="control-button control-x" type="button" aria-label="Rotate clockwise" data-control-code="KeyX">X</button>
+        </div>
+      </div>
     </div>
 
     <footer class="site-footer">
@@ -457,6 +592,7 @@
 
   <script>
     const gameFrame = document.getElementById("gameFrame");
+    const mobileControlPanel = document.getElementById("mobileControlPanel");
     const updatePrompt = document.getElementById("updatePrompt");
     const reloadUpdate = document.getElementById("reloadUpdate");
     const mobilePlayQuery = window.matchMedia("(max-width: 720px)");
@@ -464,6 +600,9 @@
     let virtualGamepadSyncTimer = 0;
     let virtualGamepadSyncAttempts = 0;
     const maxVirtualGamepadSyncAttempts = 80;
+    const MIN_CONTROL_PRESS_MS = 90;
+    const activeControlPointers = new Map();
+    const activeControlCounts = new Map();
 
     function dispatchKey(code, type) {
       window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
@@ -476,6 +615,122 @@
 
     function focusGame() {
       gameFrame.scrollIntoView({ block: "center", inline: "center" });
+    }
+
+    function beginControlPress(button, pointerId) {
+      const code = button.dataset.controlCode;
+      if (!code) {
+        return;
+      }
+
+      const existing = activeControlPointers.get(pointerId);
+      if (existing) {
+        if (existing.releaseTimer === 0) {
+          return;
+        }
+
+        window.clearTimeout(existing.releaseTimer);
+        existing.releaseTimer = 0;
+        releaseControlPress(pointerId, existing);
+      }
+
+      activeControlPointers.set(pointerId, {
+        button,
+        code,
+        releaseTimer: 0,
+        startedAt: Date.now()
+      });
+      activeControlCounts.set(code, (activeControlCounts.get(code) || 0) + 1);
+      button.dataset.pressed = "true";
+
+      if (activeControlCounts.get(code) === 1) {
+        dispatchKey(code, "keydown");
+      }
+    }
+
+    function syncButtonPressed(button) {
+      for (const active of activeControlPointers.values()) {
+        if (active.button === button) {
+          button.dataset.pressed = "true";
+          return;
+        }
+      }
+      button.dataset.pressed = "false";
+    }
+
+    function releaseControlPress(pointerId, active) {
+      if (activeControlPointers.get(pointerId) !== active) {
+        return;
+      }
+
+      activeControlPointers.delete(pointerId);
+      const count = (activeControlCounts.get(active.code) || 1) - 1;
+      if (count <= 0) {
+        activeControlCounts.delete(active.code);
+        dispatchKey(active.code, "keyup");
+      } else {
+        activeControlCounts.set(active.code, count);
+      }
+      syncButtonPressed(active.button);
+    }
+
+    function endControlPress(pointerId, force = false) {
+      const active = activeControlPointers.get(pointerId);
+      if (!active) {
+        return;
+      }
+
+      if (active.releaseTimer !== 0) {
+        if (!force) {
+          return;
+        }
+        window.clearTimeout(active.releaseTimer);
+        active.releaseTimer = 0;
+      }
+
+      const elapsed = Date.now() - active.startedAt;
+      if (!force && elapsed < MIN_CONTROL_PRESS_MS) {
+        active.releaseTimer = window.setTimeout(() => {
+          active.releaseTimer = 0;
+          releaseControlPress(pointerId, active);
+        }, MIN_CONTROL_PRESS_MS - elapsed);
+        return;
+      }
+
+      releaseControlPress(pointerId, active);
+    }
+
+    function cancelAllControlPresses() {
+      for (const pointerId of Array.from(activeControlPointers.keys())) {
+        endControlPress(pointerId, true);
+      }
+    }
+
+    function installMobileControls() {
+      for (const button of mobileControlPanel.querySelectorAll("[data-control-code]")) {
+        button.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.setPointerCapture?.(event.pointerId);
+          beginControlPress(button, event.pointerId);
+        });
+        button.addEventListener("pointerup", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          endControlPress(event.pointerId);
+        });
+        button.addEventListener("pointercancel", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          endControlPress(event.pointerId);
+        });
+        button.addEventListener("lostpointercapture", (event) => {
+          endControlPress(event.pointerId);
+        });
+        button.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+        });
+      }
     }
 
     function scheduleBuiltInVirtualGamepadSync() {
@@ -501,7 +756,13 @@
       if (!appRoot.getElementById("falling-block-mobile-vpad-host")) {
         const style = document.createElement("style");
         style.id = "falling-block-mobile-vpad-host";
-        style.textContent = "@media (max-width: 720px) { wasm4-virtual-gamepad { display: inherit !important; } }";
+        style.textContent = `
+          @media (max-width: 720px) {
+            wasm4-virtual-gamepad {
+              display: none !important;
+            }
+          }
+        `;
         appRoot.appendChild(style);
       }
 
@@ -517,7 +778,13 @@
       if (!virtualGamepadRoot.getElementById("falling-block-mobile-vpad")) {
         const style = document.createElement("style");
         style.id = "falling-block-mobile-vpad";
-        style.textContent = "@media (max-width: 720px) { :host { display: inherit !important; } }";
+        style.textContent = `
+          @media (max-width: 720px) {
+            :host {
+              display: none !important;
+            }
+          }
+        `;
         virtualGamepadRoot.appendChild(style);
       }
     }
@@ -545,6 +812,8 @@
 
     syncBuiltInVirtualGamepad();
     window.addEventListener("resize", syncBuiltInVirtualGamepad);
+    window.addEventListener("blur", cancelAllControlPresses);
+    installMobileControls();
 
     document.getElementById("startGame").addEventListener("click", () => {
       enterMobileFullscreen();
