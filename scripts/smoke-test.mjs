@@ -58,6 +58,10 @@ if (!sw.includes('event.request.mode === "navigate"') || !sw.includes('cache.put
   throw new Error("dist/sw.js must use network-first navigation with offline index fallback");
 }
 
+if (!sw.includes("if (!response.ok)") || !sw.includes("event.waitUntil(caches.open(CACHE_NAME)")) {
+  throw new Error("dist/sw.js must only update the offline index cache with successful navigation responses");
+}
+
 if (sw.includes('  "./",')) {
   throw new Error("dist/sw.js must not cache root navigation as a cache-first asset");
 }
@@ -95,7 +99,9 @@ for (const needle of [
   "data-play-view",
   "requestFullscreen",
   "wasm4-virtual-gamepad",
-  "falling-block-mobile-vpad"
+  "falling-block-mobile-vpad",
+  "virtualGamepadSyncTimer",
+  "maxVirtualGamepadSyncAttempts"
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`dist/index.html missing ${needle}`);

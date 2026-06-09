@@ -461,6 +461,9 @@
     const reloadUpdate = document.getElementById("reloadUpdate");
     const mobilePlayQuery = window.matchMedia("(max-width: 720px)");
     let waitingWorker = null;
+    let virtualGamepadSyncTimer = 0;
+    let virtualGamepadSyncAttempts = 0;
+    const maxVirtualGamepadSyncAttempts = 80;
 
     function dispatchKey(code, type) {
       window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
@@ -475,11 +478,23 @@
       gameFrame.scrollIntoView({ block: "center", inline: "center" });
     }
 
+    function scheduleBuiltInVirtualGamepadSync() {
+      if (virtualGamepadSyncTimer !== 0 || virtualGamepadSyncAttempts >= maxVirtualGamepadSyncAttempts) {
+        return;
+      }
+
+      virtualGamepadSyncAttempts += 1;
+      virtualGamepadSyncTimer = window.setTimeout(() => {
+        virtualGamepadSyncTimer = 0;
+        syncBuiltInVirtualGamepad();
+      }, 100);
+    }
+
     function syncBuiltInVirtualGamepad() {
       const app = document.querySelector("wasm4-app");
       const appRoot = app?.shadowRoot;
       if (!appRoot) {
-        window.setTimeout(syncBuiltInVirtualGamepad, 100);
+        scheduleBuiltInVirtualGamepadSync();
         return;
       }
 
@@ -492,7 +507,14 @@
 
       const virtualGamepad = appRoot.querySelector("wasm4-virtual-gamepad");
       const virtualGamepadRoot = virtualGamepad?.shadowRoot;
-      if (virtualGamepadRoot && !virtualGamepadRoot.getElementById("falling-block-mobile-vpad")) {
+      if (!virtualGamepadRoot) {
+        scheduleBuiltInVirtualGamepadSync();
+        return;
+      }
+
+      virtualGamepadSyncAttempts = 0;
+
+      if (!virtualGamepadRoot.getElementById("falling-block-mobile-vpad")) {
         const style = document.createElement("style");
         style.id = "falling-block-mobile-vpad";
         style.textContent = "@media (max-width: 720px) { :host { display: inherit !important; } }";
