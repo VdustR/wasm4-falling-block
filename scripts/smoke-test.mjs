@@ -36,6 +36,7 @@ for (const needle of [
   "id=\"startGame\"",
   "id=\"gameFrame\"",
   "src=\"cart.html\"",
+  "allow=\"autoplay; fullscreen; gamepad\"",
   "id=\"updatePrompt\"",
   "navigator.serviceWorker.register",
   "favicon.ico",
@@ -115,7 +116,8 @@ for (const needle of [
   "apple-mobile-web-app-capable",
   "mobile-web-app-capable",
   "data-play-view",
-  "requestFullscreen"
+  "requestFullscreen",
+  "contentWindow?.focus()"
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`dist/index.html missing ${needle}`);

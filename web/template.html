@@ -422,7 +422,7 @@
 
       <section class="game-panel" aria-label="Falling Block game viewport">
         <div class="viewport-frame">
-          <iframe class="game-iframe" id="gameFrame" src="cart.html" title="__APP_TITLE__ cartridge" allow="fullscreen; gamepad"></iframe>
+          <iframe class="game-iframe" id="gameFrame" src="cart.html" title="__APP_TITLE__ cartridge" allow="autoplay; fullscreen; gamepad"></iframe>
         </div>
       </section>
 
@@ -449,6 +449,7 @@
     function focusGame() {
       gameFrame.scrollIntoView({ block: "center", inline: "center" });
       gameFrame.focus();
+      gameFrame.contentWindow?.focus();
     }
 
     function enterMobileFullscreen() {
