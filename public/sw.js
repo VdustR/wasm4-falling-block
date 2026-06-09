@@ -1,6 +1,7 @@
 const CACHE_NAME = "falling-block-__CACHE_VERSION__";
 const CACHE_ASSETS = [
   "./index.html",
+  "./cart.html",
   "./manifest.webmanifest",
   "./favicon.ico",
   "./icon.svg",
@@ -41,6 +42,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (event.request.mode === "navigate") {
+    const url = new URL(event.request.url);
+    const fallback = url.pathname.endsWith("/cart.html") ? "./cart.html" : "./index.html";
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -49,10 +52,10 @@ self.addEventListener("fetch", (event) => {
           }
 
           const copy = response.clone();
-          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy)));
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(fallback, copy)));
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(() => caches.match(fallback))
     );
     return;
   }
