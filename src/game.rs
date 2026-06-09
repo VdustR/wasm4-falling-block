@@ -75,6 +75,12 @@ pub struct Game {
     clear_timer: u8,
     frame: u32,
     last_input: u8,
+    left_hold_frames: u8,
+    right_hold_frames: u8,
+    lock_timer: u8,
+    buffered_input: u8,
+    input_buffer_timer: u8,
+    soft_drop_sound_timer: u8,
     score: u32,
     lines: u16,
     level: u8,
@@ -85,6 +91,13 @@ pub struct Game {
 
 const START_X: i8 = 3;
 const START_Y: i8 = 0;
+const DAS_FRAMES: u8 = 12;
+const ARR_FRAMES: u8 = 4;
+const LOCK_DELAY_FRAMES: u8 = 20;
+const INPUT_BUFFER_FRAMES: u8 = 18;
+const SOFT_DROP_FRAMES: u32 = 2;
+const SOFT_DROP_SOUND_FRAMES: u8 = 5;
+const BUFFERABLE_INPUT: u8 = BTN_LEFT | BTN_RIGHT | BTN_1 | BTN_2;
 const EMPTY_STYLE: BlockStyle = BlockStyle {
     color: 0,
     pattern: BlockPattern::Solid,
@@ -156,6 +169,12 @@ impl Game {
             clear_timer: 0,
             frame: 0,
             last_input: 0,
+            left_hold_frames: 0,
+            right_hold_frames: 0,
+            lock_timer: 0,
+            buffered_input: 0,
+            input_buffer_timer: 0,
+            soft_drop_sound_timer: 0,
             score: 0,
             lines: 0,
             level: 0,
@@ -197,6 +216,8 @@ impl Game {
         }
 
         self.last_input = input;
+        self.age_input_buffer();
+        self.tick_soft_drop_sound_timer();
         TickResult { sound }
     }
 
@@ -280,6 +301,7 @@ impl Game {
 
     fn update_playing(&mut self, input: u8, pressed: u8) -> SoundEvent {
         if self.clear_timer > 0 {
+            self.buffer_input(pressed);
             self.clear_timer -= 1;
             if self.clear_timer == 0 {
                 self.apply_clear_mask(self.clear_mask);
@@ -288,26 +310,14 @@ impl Game {
                 if self.mode == Mode::GameOver {
                     return SoundEvent::GameOver;
                 }
+                self.apply_buffered_input();
             }
             return SoundEvent::None;
         }
 
-        let repeat = self.frame % 7 == 0;
-        let mut sound = SoundEvent::None;
+        let mut sound = self.update_horizontal_movement(input, pressed);
 
-        if pressed & BTN_LEFT != 0 || (input & BTN_LEFT != 0 && repeat) {
-            if self.try_move(-1, 0) {
-                sound = SoundEvent::Move;
-            }
-        }
-
-        if pressed & BTN_RIGHT != 0 || (input & BTN_RIGHT != 0 && repeat) {
-            if self.try_move(1, 0) {
-                sound = SoundEvent::Move;
-            }
-        }
-
-        if pressed & (BTN_1 | BTN_UP) != 0 {
+        if pressed & BTN_1 != 0 {
             if self.try_rotate(1) {
                 sound = SoundEvent::Rotate;
             }
@@ -319,20 +329,30 @@ impl Game {
             }
         }
 
-        if input & BTN_DOWN != 0 && self.frame % 2 == 0 {
+        if pressed & BTN_UP != 0 {
+            return self.hard_drop();
+        }
+
+        if input & BTN_DOWN != 0 && self.frame % SOFT_DROP_FRAMES == 0 {
             if self.try_move(0, 1) {
+                self.lock_timer = 0;
                 self.score = self.score.saturating_add(1);
                 self.touch_hi_score();
-                return SoundEvent::SoftDrop;
+                if self.soft_drop_sound_timer == 0 {
+                    self.soft_drop_sound_timer = SOFT_DROP_SOUND_FRAMES;
+                    sound = SoundEvent::SoftDrop;
+                }
             }
         }
 
         if self.frame % self.gravity_frames() == 0 {
             if self.try_move(0, 1) {
-                sound
-            } else {
-                self.lock_piece()
+                self.lock_timer = 0;
             }
+        }
+
+        if let Some(lock_sound) = self.update_lock_delay() {
+            lock_sound
         } else {
             sound
         }
@@ -399,6 +419,7 @@ impl Game {
         self.demo_target_rot = 0;
         self.mode = Mode::Playing;
         self.last_input = 0;
+        self.reset_timing_state();
     }
 
     fn try_move(&mut self, dx: i8, dy: i8) -> bool {
@@ -419,10 +440,22 @@ impl Game {
             kind: self.current.kind,
             rot,
         };
-        for kick in [0, -1, 1, -2, 2] {
-            if self.fits(rotated, self.x + kick, self.y) {
+        for (kick_x, kick_y) in [
+            (0, 0),
+            (-1, 0),
+            (1, 0),
+            (-2, 0),
+            (2, 0),
+            (0, -1),
+            (-1, -1),
+            (1, -1),
+            (0, -2),
+        ] {
+            if self.fits(rotated, self.x + kick_x, self.y + kick_y) {
                 self.current = rotated;
-                self.x += kick;
+                self.x += kick_x;
+                self.y += kick_y;
+                self.lock_timer = 0;
                 return true;
             }
         }
@@ -430,6 +463,7 @@ impl Game {
     }
 
     fn lock_piece(&mut self) -> SoundEvent {
+        self.lock_timer = 0;
         let piece_id = self.take_next_piece_id();
         for (cx, cy) in Self::piece_cells(self.current) {
             let bx = self.x + cx;
@@ -470,6 +504,7 @@ impl Game {
         self.next_style = self.random_style();
         self.x = START_X;
         self.y = START_Y;
+        self.lock_timer = 0;
         if !self.fits(self.current, self.x, self.y) {
             self.mode = Mode::GameOver;
             self.touch_hi_score();
@@ -509,6 +544,7 @@ impl Game {
         self.next_style = self.random_style();
         self.x = START_X;
         self.y = START_Y;
+        self.lock_timer = 0;
         self.set_demo_target();
         if !self.fits(self.current, self.x, self.y) {
             self.reset_cpu_demo();
@@ -533,7 +569,141 @@ impl Game {
         self.next_style = self.random_style();
         self.x = START_X;
         self.y = START_Y;
+        self.reset_timing_state();
         self.set_demo_target();
+    }
+
+    fn update_horizontal_movement(&mut self, input: u8, pressed: u8) -> SoundEvent {
+        let left = input & BTN_LEFT != 0;
+        let right = input & BTN_RIGHT != 0;
+
+        if left == right {
+            self.left_hold_frames = 0;
+            self.right_hold_frames = 0;
+            return SoundEvent::None;
+        }
+
+        if left {
+            self.right_hold_frames = 0;
+            if pressed & BTN_LEFT != 0 {
+                self.left_hold_frames = 0;
+                return self.try_horizontal_move(-1);
+            }
+
+            self.left_hold_frames = self.left_hold_frames.saturating_add(1);
+            if should_repeat_horizontal(self.left_hold_frames) {
+                return self.try_horizontal_move(-1);
+            }
+        } else {
+            self.left_hold_frames = 0;
+            if pressed & BTN_RIGHT != 0 {
+                self.right_hold_frames = 0;
+                return self.try_horizontal_move(1);
+            }
+
+            self.right_hold_frames = self.right_hold_frames.saturating_add(1);
+            if should_repeat_horizontal(self.right_hold_frames) {
+                return self.try_horizontal_move(1);
+            }
+        }
+
+        SoundEvent::None
+    }
+
+    fn try_horizontal_move(&mut self, dx: i8) -> SoundEvent {
+        if self.try_move(dx, 0) {
+            self.lock_timer = 0;
+            SoundEvent::Move
+        } else {
+            SoundEvent::None
+        }
+    }
+
+    fn update_lock_delay(&mut self) -> Option<SoundEvent> {
+        if !self.grounded() {
+            self.lock_timer = 0;
+            return None;
+        }
+
+        self.lock_timer = self.lock_timer.saturating_add(1);
+        if self.lock_timer > LOCK_DELAY_FRAMES {
+            Some(self.lock_piece())
+        } else {
+            None
+        }
+    }
+
+    fn hard_drop(&mut self) -> SoundEvent {
+        let mut dropped = 0u32;
+        while self.try_move(0, 1) {
+            dropped += 1;
+        }
+
+        if dropped > 0 {
+            self.score = self.score.saturating_add(dropped * 2);
+            self.touch_hi_score();
+        }
+        self.lock_piece()
+    }
+
+    fn grounded(&self) -> bool {
+        !self.fits(self.current, self.x, self.y + 1)
+    }
+
+    fn buffer_input(&mut self, pressed: u8) {
+        let input = pressed & BUFFERABLE_INPUT;
+        if input != 0 {
+            self.buffered_input = input;
+            self.input_buffer_timer = INPUT_BUFFER_FRAMES;
+        }
+    }
+
+    fn apply_buffered_input(&mut self) {
+        if self.input_buffer_timer == 0 || self.mode != Mode::Playing {
+            return;
+        }
+
+        let input = self.buffered_input;
+        self.buffered_input = 0;
+        self.input_buffer_timer = 0;
+
+        if input & BTN_1 != 0 {
+            self.try_rotate(1);
+        } else if input & BTN_2 != 0 {
+            self.try_rotate(-1);
+        }
+
+        if input & BTN_LEFT != 0 && input & BTN_RIGHT == 0 {
+            self.try_move(-1, 0);
+        } else if input & BTN_RIGHT != 0 && input & BTN_LEFT == 0 {
+            self.try_move(1, 0);
+        }
+    }
+
+    fn age_input_buffer(&mut self) {
+        if self.input_buffer_timer == 0 {
+            return;
+        }
+
+        self.input_buffer_timer -= 1;
+        if self.input_buffer_timer == 0 {
+            self.buffered_input = 0;
+        }
+    }
+
+    fn tick_soft_drop_sound_timer(&mut self) {
+        if self.soft_drop_sound_timer > 0 {
+            self.soft_drop_sound_timer -= 1;
+        }
+    }
+
+    fn reset_timing_state(&mut self) {
+        self.left_hold_frames = 0;
+        self.right_hold_frames = 0;
+        self.lock_timer = 0;
+        self.buffered_input = 0;
+        self.input_buffer_timer = 0;
+        self.soft_drop_sound_timer = 0;
     }
 
     #[cfg(test)]
@@ -761,6 +931,10 @@ fn row_full_in(board: &[u8; BOARD_CELLS], y: usize) -> bool {
     true
 }
 
+fn should_repeat_horizontal(held_frames: u8) -> bool {
+    held_frames >= DAS_FRAMES && (held_frames - DAS_FRAMES) % ARR_FRAMES == 0
+}
+
 fn target_range(piece: Piece) -> (i8, i8) {
     let cells = Game::piece_cells(piece);
     let mut min_x = 4i8;
@@ -853,6 +1027,86 @@ mod tests {
 
         assert_eq!(result.sound, SoundEvent::Rotate);
         assert!(game.position().0 >= 0);
+    }
+
+    #[test]
+    fn held_horizontal_movement_waits_for_das_before_repeating() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 1, rot: 0 };
+        game.x = 4;
+        game.y = 0;
+
+        game.tick(BTN_LEFT);
+        assert_eq!(game.position().0, 3);
+
+        for _ in 0..11 {
+            game.tick(BTN_LEFT);
+        }
+        assert_eq!(game.position().0, 3);
+
+        game.tick(BTN_LEFT);
+        assert_eq!(game.position().0, 2);
+    }
+
+    #[test]
+    fn buffered_rotation_applies_after_line_clear_animation() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 0, rot: 0 };
+        game.next = Piece { kind: 2, rot: 0 };
+        game.x = 3;
+        game.y = 18;
+
+        for x in 0..BOARD_WIDTH {
+            if !(3..=6).contains(&x) {
+                game.board[19 * BOARD_WIDTH + x] = 2;
+            }
+        }
+
+        assert_eq!(game.lock_piece(), SoundEvent::Line(1));
+        game.tick(BTN_1);
+        game.tick(0);
+        while game.is_clearing() {
+            game.tick(0);
+        }
+
+        assert_eq!(game.current.kind, 2);
+        assert_eq!(game.current.rot, 1);
+    }
+
+    #[test]
+    fn grounded_piece_uses_lock_delay_before_locking() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 1, rot: 0 };
+        game.x = 4;
+        game.y = 18;
+        game.frame = game.gravity_frames() - 1;
+
+        let result = game.tick(0);
+
+        assert_eq!(result.sound, SoundEvent::None);
+        assert_eq!(game.current.kind, 1);
+        assert!(game.board.iter().all(|cell| *cell == 0));
+
+        for _ in 0..20 {
+            game.tick(0);
+        }
+
+        assert!(game.board.iter().any(|cell| *cell != 0));
+    }
+
+    #[test]
+    fn up_input_hard_drops_and_locks_the_piece() {
+        let mut game = playing_game();
+        game.current = Piece { kind: 1, rot: 0 };
+        game.x = 4;
+        game.y = 0;
+
+        let result = game.tick(BTN_UP);
+
+        assert_eq!(result.sound, SoundEvent::Lock);
+        assert_eq!(game.cell(5, 18), 2);
+        assert_eq!(game.cell(6, 19), 2);
+        assert_eq!(game.score(), 36);
     }
 
     #[test]

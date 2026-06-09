@@ -18,7 +18,7 @@ Use `system-ui` for the PWA shell and the WASM-4 built-in 8px bitmap font inside
 
 ## Layout
 
-The page is a full-height app shell. A compact command panel sits beside or above the 160x160 WASM-4 viewport depending on available width. No landing-page hero or nested cards. On small screens, Start and Focus enter a play view that hides the web shell chrome and gives the square game viewport the largest safe-area-aware fullscreen footprint available.
+The page is a full-height app shell. A compact command panel sits beside or above the 160x160 WASM-4 viewport depending on available width. No landing-page hero or nested cards. On small screens, Start and Focus enter a play view that hides the web shell chrome, places the game viewport in the upper play area, and reserves a bottom control dock for touch input.
 
 ## Components
 
@@ -30,7 +30,9 @@ The page is a full-height app shell. A compact command panel sits beside or abov
 - Game-over overlay: restart instructions must stay inside a black panel so they never overlap unreadably with the board behind them.
 - Start button: filled accent action, keyboard and pointer accessible.
 - Mobile fullscreen: installed PWA launch requests fullscreen display mode. Browser play view uses the Fullscreen API when available and still works as a chrome-free mobile layout when the API is unavailable.
-- Visual pad: mobile play view uses the WASM-4 runtime's built-in virtual gamepad. The cartridge must not set `SYSTEM_HIDE_GAMEPAD_OVERLAY`; the shell only forces the built-in gamepad visible on narrow viewports when desktop test browsers do not report coarse pointer media.
+- Mobile controls: the WASM-4 runtime's built-in virtual gamepad is an overlay, so the PWA shell hides it on narrow viewports and provides a bottom control dock that dispatches the same keyboard inputs. This keeps the board readable while preserving standard WASM-4 cartridge input.
+- Game feel: horizontal movement uses deterministic DAS/ARR instead of frame-modulo repeats, line-clear transitions buffer recent rotate/shift input, grounded pieces use a short lock delay, and Arrow Up hard-drops. These choices keep the GB-inspired feel but remove avoidable missed-input frustration on keyboard and mobile.
+- Update prompts move to the top edge during play view to avoid competing with thumb controls.
 - Update prompt: small fixed toast with a direct reload action.
 - Footer: compact MIT License, 2026 VdustR (ViPro), and GitHub link.
 - Rights note: short, explicit, and linked to `docs/music-rights.md` in the repository.

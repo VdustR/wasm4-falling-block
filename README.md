@@ -10,14 +10,15 @@ Repository metadata targets `vdustr/wasm4-falling-block`.
 - Title screen with persistent hi score and heuristic CPU demo play before the player starts.
 - Classic 10x20 falling-block board, next preview, score, lines, and level.
 - Original chiptune loop and sound effects using WASM-4 `tone()`.
-- Fullscreen-first mobile PWA shell with WASM-4 virtual gamepad support, offline caching, and an update prompt.
+- Fullscreen-first mobile PWA shell with dedicated touch controls, offline caching, and an update prompt.
 - MIT license, copyright 2026 VdustR (ViPro).
 
 ## Controls
 
 - Arrow Left / Arrow Right: move.
 - Arrow Down: soft drop.
-- X, Space, Arrow Up: rotate clockwise or start.
+- Arrow Up: hard drop.
+- X, Space: rotate clockwise or start.
 - Z: rotate counterclockwise or start.
 - Enter: WASM-4 runtime menu.
 
