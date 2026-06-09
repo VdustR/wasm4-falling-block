@@ -24,7 +24,7 @@ The page is a full-height app shell. A compact command panel sits beside or abov
 
 - Brand system: the primary mark is the selected `Slanted Drop Cart` direction from `docs/logo-showcase.html`: a pure tilted retro cartridge icon with a lime body, black play window, and orange active block. It intentionally has no outer tile background, while reusing the Falling Block palette so the app icon, main visual, and cartridge feel like one system.
 - Game viewport: square, pixel-rendered, framed by restrained product chrome.
-- Blocks: each tetromino receives a random single-color visual style independent of piece kind and gameplay state. The four style variants are solid, cutout, inner-frame, and dither. Locked pieces render as connected shapes with outer contours, not isolated cells. Cleared rows recalculate contours as cells disappear.
+- Blocks: each tetromino receives a random single-color visual style independent of piece kind and gameplay state. The readable variants are solid, inner-frame, and dither; the hollow cutout variant is intentionally removed. Cell fills do not draw per-cell borders; blocks render as connected shapes with black/background-colored outer contours, and cleared rows recalculate contours as cells disappear.
 - Hi score: prominent numeric readout on the cartridge title screen. The web shell avoids duplicate score or mode cards.
 - Title demo: before player start, the cartridge runs low-key CPU demo play in the viewport while keeping the real game unstarted. The title overlay stays on the board, showing hi score and an always-visible blinking `PRESS X/Z START` prompt.
 - Game-over overlay: restart instructions must stay inside a black panel so they never overlap unreadably with the board behind them.
