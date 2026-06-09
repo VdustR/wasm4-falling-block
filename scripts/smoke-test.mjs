@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const required = [
   "dist/index.html",
+  "dist/cart.html",
   "dist/manifest.webmanifest",
   "dist/sw.js",
   "dist/favicon.ico",
@@ -25,14 +26,17 @@ for (const file of required) {
 }
 
 const html = readFileSync(join(root, "dist/index.html"), "utf8");
+const cartHtml = readFileSync(join(root, "dist/cart.html"), "utf8");
 const sw = readFileSync(join(root, "dist/sw.js"), "utf8");
 const manifest = readFileSync(join(root, "dist/manifest.webmanifest"), "utf8");
 
 for (const needle of [
-  "<wasm4-app",
   "Falling Block",
   "A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio.",
   "id=\"startGame\"",
+  "id=\"gameFrame\"",
+  "src=\"cart.html\"",
+  "allow=\"autoplay; fullscreen; gamepad\"",
   "id=\"updatePrompt\"",
   "navigator.serviceWorker.register",
   "favicon.ico",
@@ -50,11 +54,22 @@ for (const needle of [
   }
 }
 
+for (const needle of [
+  "<wasm4-app",
+  "wasm4-virtual-gamepad",
+  "wasm4-disk-prefix",
+  "Falling Block"
+]) {
+  if (!cartHtml.includes(needle)) {
+    throw new Error(`dist/cart.html missing ${needle}`);
+  }
+}
+
 if (!sw.includes("CACHE_ASSETS") || !sw.includes("SKIP_WAITING")) {
   throw new Error("dist/sw.js is missing offline/update behavior");
 }
 
-if (!sw.includes('event.request.mode === "navigate"') || !sw.includes('cache.put("./index.html", copy)')) {
+if (!sw.includes('event.request.mode === "navigate"') || !sw.includes('url.pathname.endsWith("/cart.html") ? "./cart.html" : "./index.html"')) {
   throw new Error("dist/sw.js must use network-first navigation with offline index fallback");
 }
 
@@ -87,6 +102,10 @@ for (const cachedAsset of ["./favicon.ico", "./icon-192.png", "./icon-512.png", 
   }
 }
 
+if (!sw.includes("./cart.html")) {
+  throw new Error("dist/sw.js is missing cached cart.html");
+}
+
 for (const cachedAsset of ["./main-visual.svg", "./main-visual.png", "./og-image.png"]) {
   if (!sw.includes(cachedAsset)) {
     throw new Error(`dist/sw.js is missing brand asset ${cachedAsset}`);
@@ -98,22 +117,25 @@ for (const needle of [
   "mobile-web-app-capable",
   "data-play-view",
   "requestFullscreen",
-  "wasm4-virtual-gamepad",
-  "falling-block-mobile-vpad",
-  "mobileControlPanel",
-  "data-control-code",
-  "activeControlPointers",
-  "MIN_CONTROL_PRESS_MS",
-  "releaseControlPress(pointerId, existing)",
-  "virtualGamepadSyncTimer",
-  "maxVirtualGamepadSyncAttempts"
+  "contentWindow?.focus()"
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`dist/index.html missing ${needle}`);
   }
 }
 
-for (const removedNeedle of ["class=\"touch-controls\"", "data-key-code=\"ArrowLeft\""]) {
+for (const removedNeedle of [
+  "<wasm4-app",
+  "wasm4-virtual-gamepad",
+  "class=\"touch-controls\"",
+  "data-key-code=\"ArrowLeft\"",
+  "mobileControlPanel",
+  "data-control-code",
+  "activeControlPointers",
+  "falling-block-mobile-vpad",
+  "__APP_TITLE__",
+  "__APP_DESCRIPTION__"
+]) {
   if (html.includes(removedNeedle)) {
     throw new Error(`dist/index.html still includes shell-owned touch controls: ${removedNeedle}`);
   }

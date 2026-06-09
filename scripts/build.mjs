@@ -7,7 +7,8 @@ import { createHash } from "node:crypto";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const dist = join(root, "dist");
 const cart = join(root, "target/wasm32-unknown-unknown/release/falling_block.wasm");
-const html = join(dist, "index.html");
+const shellHtml = join(dist, "index.html");
+const cartHtml = join(dist, "cart.html");
 const appTitle = "Falling Block";
 const appDescription = "A Tetris-like falling block puzzle for WASM-4 with offline PWA support, mobile controls, and handmade chiptune audio.";
 
@@ -47,31 +48,24 @@ run(w4.command, [
   "bundle",
   cart,
   "--html",
-  html,
+  cartHtml,
   "--title",
   appTitle,
   "--description",
   appDescription,
   "--icon-file",
   join(root, "public/icon.svg"),
-  "--html-template",
-  join(root, "web/template.html"),
   "--html-disk-prefix",
   appTitle
 ]);
 
-const bundled = readFileSync(html, "utf8");
-const patched = bundled.replace(
-  ".content{width:100vmin;height:100vmin;overflow:hidden}",
-  ".content{width:100%;height:100%;overflow:hidden}"
-).replaceAll("width:100vmin;height:100vmin;", "width:100%;height:100%;");
+const cartPage = readFileSync(cartHtml, "utf8");
+const shell = readFileSync(join(root, "web/template.html"), "utf8")
+  .replaceAll("__APP_TITLE__", appTitle)
+  .replaceAll("__APP_DESCRIPTION__", appDescription);
+writeFileSync(shellHtml, shell);
 
-if (patched === bundled) {
-  throw new Error("Could not patch embedded WASM-4 viewport sizing");
-}
-
-writeFileSync(html, patched);
-const cacheVersion = createHash("sha256").update(patched).digest("hex").slice(0, 12);
+const cacheVersion = createHash("sha256").update(shell).update(cartPage).digest("hex").slice(0, 12);
 const serviceWorker = readFileSync(join(root, "public/sw.js"), "utf8").replace(
   "__CACHE_VERSION__",
   cacheVersion
