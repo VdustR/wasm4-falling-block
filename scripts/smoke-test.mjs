@@ -44,8 +44,8 @@ for (const needle of [
   "class=\"brand-icon\"",
   "src=\"icon-192.png\"",
   "apple-touch-icon",
-  "https://vdustr.dev/wasm4-falling-block/",
-  "https://vdustr.dev/wasm4-falling-block/og-image.png",
+  "https://vdustr.github.io/wasm4-falling-block/",
+  "https://vdustr.github.io/wasm4-falling-block/og-image.png",
   "og:image:width",
   "og:image:height"
 ]) {
