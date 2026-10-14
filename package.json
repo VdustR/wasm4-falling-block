@@ -10,6 +10,7 @@
     "url": "https://github.com/vdustr/wasm4-falling-block.git"
   },
   "scripts": {
+    "test:security": "node scripts/security-test.mjs",
     "build": "node scripts/build.mjs",
     "smoke": "node scripts/smoke-test.mjs",
     "serve": "node scripts/serve-dist.mjs"
